@@ -70,36 +70,36 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
 
-mavenPublishing {
-    publishToMavenCentral(automaticRelease = true)
-    signAllPublications()
-
-    coordinates(artifact, "Gauge", version)
-
-    pom {
-        name.set("Gauge")
-        description.set("Gauge Composable is a fusion of classic and modern Gauges with some customization options.")
-        inceptionYear.set("2023")
-        url.set("https://github.com/yamin8000/Gauge")
-        licenses {
-            license {
-                name.set("GPL-3.0 license ")
-                url.set("https://www.gnu.org/licenses")
-                distribution.set("https://raw.githubusercontent.com/yamin8000/Gauge/master/LICENSE")
-            }
-        }
-        developers {
-            developer {
-                id.set("yamin8000")
-                name.set("Yamin Siahmargooei")
-                email.set("me@yamins.ir")
-                url.set("https://github.com/yamin8000")
-            }
-        }
-        scm {
-            url.set("https://github.com/yamin8000/Gauge")
-            connection.set("scm:git:git://github.com/yamin8000/Gauge.git")
-            developerConnection.set("scm:git:ssh://git@github.com:yamin8000/Gauge.git")
-        }
-    }
-}
+// mavenPublishing {
+//     publishToMavenCentral(automaticRelease = true)
+//     signAllPublications()
+//
+//     coordinates(artifact, "Gauge", version)
+//
+//     pom {
+//         name.set("Gauge")
+//         description.set("Gauge Composable is a fusion of classic and modern Gauges with some customization options.")
+//         inceptionYear.set("2023")
+//         url.set("https://github.com/yamin8000/Gauge")
+//         licenses {
+//             license {
+//                 name.set("GPL-3.0 license ")
+//                 url.set("https://www.gnu.org/licenses")
+//                 distribution.set("https://raw.githubusercontent.com/yamin8000/Gauge/master/LICENSE")
+//             }
+//         }
+//         developers {
+//             developer {
+//                 id.set("yamin8000")
+//                 name.set("Yamin Siahmargooei")
+//                 email.set("me@yamins.ir")
+//                 url.set("https://github.com/yamin8000")
+//             }
+//         }
+//         scm {
+//             url.set("https://github.com/yamin8000/Gauge")
+//             connection.set("scm:git:git://github.com/yamin8000/Gauge.git")
+//             developerConnection.set("scm:git:ssh://git@github.com:yamin8000/Gauge.git")
+//         }
+//     }
+// }
