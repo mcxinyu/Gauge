@@ -34,8 +34,10 @@ import androidx.compose.ui.graphics.StrokeCap
  */
 data class GaugeArcStyle(
     val hasArcs: Boolean = true,
+    val hasProgressive: Boolean = true,
     val hasProgressiveAlpha: Boolean = true,
     val bigTicksHasLabels: Boolean = true,
     val cap: StrokeCap = StrokeCap.Round,
-    val strokeWidth: Float? = null
+    val strokeWidth: Float? = null,
+    val gap: Float = 0f,
 )

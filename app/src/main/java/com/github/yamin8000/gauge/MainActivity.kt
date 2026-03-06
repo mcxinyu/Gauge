@@ -24,12 +24,16 @@ package com.github.yamin8000.gauge
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,16 +42,24 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.github.yamin8000.gauge.main.Gauge
 import com.github.yamin8000.gauge.main.GaugeNumerics
 import com.github.yamin8000.gauge.ui.color.GaugeArcColors
+import com.github.yamin8000.gauge.ui.color.GaugeColors
+import com.github.yamin8000.gauge.ui.color.GaugeTicksColors
 import com.github.yamin8000.gauge.ui.style.GaugeArcStyle
+import com.github.yamin8000.gauge.ui.style.GaugeNeedleStyle
 import com.github.yamin8000.gauge.ui.style.GaugeStyle
 import com.github.yamin8000.gauge.ui.theme.GaugeTheme
+import kotlin.Boolean
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,48 +73,74 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier
                                 .padding(16.dp)
                                 .verticalScroll(rememberScrollState())
+                                .background(Color.White)
                         ) {
                             val configuration = LocalConfiguration.current
                             val screenWidth = configuration.screenWidthDp.dp
-                            var value by remember { mutableFloatStateOf(15f) }
+                            var value by remember { mutableFloatStateOf(66.66f) }
                             var totalSize by remember { mutableStateOf(350.dp) }
                             var strokeWidth by remember { mutableFloatStateOf(35f) }
-                            val valueRange = 10f..20f
-                            Gauge(
-                                modifier = Modifier.size(totalSize),
-                                value = value,
-                                numerics = GaugeNumerics(
-                                    startAngle = 120,
-                                    sweepAngle = 300,
-                                    valueRange = valueRange,
-                                    bigTicksStep = 2,
-                                    smallTicksStep = 1
-                                ),
-                                style = GaugeStyle(
-                                    hasBorder = true,
-                                    arcStyle = GaugeArcStyle(hasProgressiveAlpha = false, strokeWidth = strokeWidth)
-                                ),
-                                arcColorsProvider = { colors, gaugeValue, range ->
-                                    when (gaugeValue) {
-                                        in range.start..range.endInclusive / 4 -> GaugeArcColors(
-                                            colors.off,
-                                            Color.Red
-                                        )
+                            val valueRange = 0f..100f
+                            Box() {
+                                Gauge(
+                                    modifier = Modifier.size(totalSize),
+                                    value = value,
+                                    numerics = GaugeNumerics(
+                                        startAngle = 135,
+                                        sweepAngle = 270,
+                                        valueRange = valueRange,
+                                        bigTicksStep = 10f,
+                                        smallTicksStep = 5f,
+                                    ),
+                                    style = GaugeStyle(
+                                        hasBorder = false,
+                                        hasValueText = true,
+                                        borderWidth = 0f,
+                                        needleStyle = GaugeNeedleStyle(
+                                            hasNeedle = true,
+                                            tipHasCircle = false,
+                                            tipHasLine = true,
+                                            hasRing = false,
+                                            ringWidth = 0f,
+                                        ),
+                                        arcStyle = GaugeArcStyle(
+                                            hasArcs = true,
+                                            hasProgressive = false,
+                                            bigTicksHasLabels = false,
+                                            cap = StrokeCap.Butt,
+                                            gap = 1f,
+                                        ),
+                                    ),
+                                    ticksColorProvider = { list ->
+                                        list.map { pair ->
+                                            if (pair.first % 33 == 0)
+                                                pair.first to Color(0xFF2962FF)
+                                            else pair
+                                        }
+                                    },
+                                    arcColorsProvider = { colors, gaugeValue, range ->
+                                        when (gaugeValue) {
+                                            in range.start..range.endInclusive / 3f ->
+                                                GaugeArcColors(colors.off, Color.Red)
 
-                                        in range.endInclusive / 4..range.endInclusive / 2 -> GaugeArcColors(
-                                            colors.off,
-                                            Color.Yellow
-                                        )
+                                            in range.endInclusive / 3f..range.endInclusive / 3 * 2 ->
+                                                GaugeArcColors(colors.off, Color.Yellow)
 
-                                        in range.endInclusive / 2..range.endInclusive * 3 / 4 -> GaugeArcColors(
-                                            colors.off,
-                                            Color(0xFFFF8000)
-                                        )
+                                            else -> GaugeArcColors(colors.off, Color.Green)
+                                        }
+                                    },
+                                )
 
-                                        else -> GaugeArcColors(colors.off, Color.Green)
-                                    }
-                                }
-                            )
+                                // Box(
+                                //     modifier = Modifier
+                                //         .align(Alignment.Center)
+                                //         .size(250.dp)
+                                //         .clip(CircleShape)
+                                //         .background(Color.White),
+                                // ) {
+                                //
+                                // }
+                            }
                             Text("width: $screenWidth")
                             Text("Value: $value")
                             Slider(
@@ -110,7 +148,8 @@ class MainActivity : ComponentActivity() {
                                 valueRange = valueRange,
                                 onValueChange = {
                                     value = it
-                                }
+                                },
+                                modifier = Modifier.padding(horizontal = 20.dp),
                             )
                             Text("Total Size: $totalSize")
                             Slider(
@@ -118,7 +157,8 @@ class MainActivity : ComponentActivity() {
                                 valueRange = 0f..500f,
                                 onValueChange = {
                                     totalSize = it.dp
-                                }
+                                },
+                                modifier = Modifier.padding(horizontal = 20.dp),
                             )
 
                             Text("Arc Stroke Width: $strokeWidth")
@@ -127,7 +167,8 @@ class MainActivity : ComponentActivity() {
                                 valueRange = 10f..60f,
                                 onValueChange = {
                                     strokeWidth = it
-                                }
+                                },
+                                modifier = Modifier.padding(horizontal = 20.dp),
                             )
                         }
                     }

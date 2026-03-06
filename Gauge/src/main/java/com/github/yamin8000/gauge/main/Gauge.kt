@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -83,7 +84,8 @@ fun Gauge(
     style: GaugeStyle = GaugeStyle(),
     colors: GaugeColors = GaugeColors.defaultColors(),
     ticksColorProvider: (List<Pair<Int, Color>>) -> List<Pair<Int, Color>> = { it },
-    arcColorsProvider: (GaugeArcColors, Float, ClosedFloatingPointRange<Float>) -> GaugeArcColors = { _, _, _ -> colors.arc }
+    arcColorsProvider: (GaugeArcColors, Float, ClosedFloatingPointRange<Float>) -> GaugeArcColors = { _, _, _ -> colors.arc },
+    arcRingColors: List<Color> = listOf(Color.Red, Color.Yellow, Color.Green),
 ) {
     require(value in numerics.valueRange) { "Gauge value: $value is out of Gauge Value range ${numerics.valueRange}" }
     require(numerics.sweepAngle in 1..360) { "Sweep angle: ${numerics.sweepAngle} must be from 1 to 360" }
@@ -128,16 +130,16 @@ fun Gauge(
                             totalSize = safeSize.toDp()
                         )
                     }
-                    drawTicks(
-                        offset = safeOffset,
-                        numerics = numerics,
-                        totalAngle = totalAngle,
-                        colors = colors.ticks,
-                        size = safeSize.toDp(),
-                        textMeasurer = textMeasurer,
-                        hasNumbers = style.arcStyle.bigTicksHasLabels,
-                        ticksColorProvider = ticksColorProvider
-                    )
+                    // drawTicks(
+                    //     offset = safeOffset,
+                    //     numerics = numerics,
+                    //     totalAngle = totalAngle,
+                    //     colors = colors.ticks,
+                    //     size = safeSize.toDp(),
+                    //     textMeasurer = textMeasurer,
+                    //     hasNumbers = style.arcStyle.bigTicksHasLabels,
+                    //     ticksColorProvider = ticksColorProvider
+                    // )
                     if (style.arcStyle.hasArcs) {
                         drawArcs(
                             offset = safeOffset,
@@ -145,10 +147,13 @@ fun Gauge(
                             style = style.arcStyle,
                             arcSizeFraction = arcSizeFraction,
                             colors = colors.arc,
+                            arcRingColors = arcRingColors,
                             numerics = numerics,
                             value = value,
                             valueRange = numerics.valueRange,
                             totalAngle = totalAngle,
+                            hasProgressive = style.arcStyle.hasProgressive,
+                            arcGap = style.arcStyle.gap,
                             arcColorsProvider = arcColorsProvider
                         )
                     }
@@ -205,13 +210,22 @@ private fun DrawScope.drawNeedle(
         x.minus(cos.times(size.toPx() / 20f)),
         y.minus(sin.times(size.toPx() / 20f))
     ).plus(offset)
-    drawLine(
-        color = colors.needle,
-        start = center,
-        strokeWidth = 10f,
-        cap = StrokeCap.Round,
-        end = endOffset
-    )
+    if (style.tipHasLine) {
+        drawLine(
+            color = colors.needle,
+            start = center,
+            strokeWidth = 10f,
+            cap = StrokeCap.Round,
+            end = endOffset
+        )
+    }
+    if (style.tipHasCircle) {
+        drawCircle(
+            color = colors.needle,
+            radius = size.toPx() / 50,
+            center = endOffset
+        )
+    }
     if (style.tipHasCircle) {
         drawCircle(
             color = colors.needle,
@@ -246,8 +260,8 @@ private fun DrawScope.drawTicks(
             numerics.startAngle.toFloat()..totalAngle.toFloat()
         ) + numerics.startAngle
         val degreeInt = degree.toInt()
-        val isSmallTick = value % numerics.smallTicksStep == 0
-        val isBigTick = isSmallTick && (value % numerics.bigTicksStep == 0)
+        val isSmallTick = value % numerics.smallTicksStep == 0f
+        val isBigTick = isSmallTick && (value % numerics.bigTicksStep == 0f)
         val isStartOrEnd =
             isBigTick && (degreeInt == numerics.startAngle || degreeInt == totalAngle)
         val tickEndRatio = if (isBigTick) size.toPx().div(5f) else size.toPx().div(6f)
@@ -314,11 +328,14 @@ private fun DrawScope.drawArcs(
     style: GaugeArcStyle,
     arcSizeFraction: Float,
     colors: GaugeArcColors,
+    arcRingColors: List<Color>,
     numerics: GaugeNumerics,
     value: Float,
     valueRange: ClosedFloatingPointRange<Float>,
     totalAngle: Int,
-    arcColorsProvider: (GaugeArcColors, Float, ClosedFloatingPointRange<Float>) -> GaugeArcColors
+    hasProgressive: Boolean,
+    arcGap: Float,
+    arcColorsProvider: (GaugeArcColors, Float, ClosedFloatingPointRange<Float>) -> GaugeArcColors,
 ) {
     val arcColors = arcColorsProvider(colors, value, valueRange)
 
@@ -339,30 +356,35 @@ private fun DrawScope.drawArcs(
         size.times((1 - arcSizeFraction) / 2).toPx(),
         size.times((1 - arcSizeFraction) / 2).toPx()
     )
-    drawArc(
-        color = arcColors.off,
-        startAngle = numerics.startAngle.toFloat(),
-        sweepAngle = numerics.sweepAngle.toFloat(),
-        useCenter = false,
-        style = arcStroke,
-        size = arcSize,
-        topLeft = arcTopLeft.plus(offset)
-    )
-    val alpha = value / valueRange.endInclusive
-    drawArc(
-        color = arcColors.on,
-        alpha = if (style.hasProgressiveAlpha && alpha in 0f..1f) alpha else 1f,
-        startAngle = numerics.startAngle.toFloat(),
-        sweepAngle = translate(
-            value,
-            valueRange.start..valueRange.endInclusive,
-            numerics.startAngle.toFloat()..totalAngle.toFloat()
-        ),
-        useCenter = false,
-        style = arcStroke,
-        size = arcSize,
-        topLeft = arcTopLeft.plus(offset)
-    )
+    val sweepAngle = numerics.sweepAngle.toFloat() / arcRingColors.size
+    arcRingColors.forEachIndexed { i, color ->
+        drawArc(
+            color = color,
+            startAngle = numerics.startAngle.toFloat() + (sweepAngle - arcGap) * i + arcGap * i,
+            sweepAngle = sweepAngle - arcGap,
+            useCenter = false,
+            style = arcStroke,
+            size = arcSize,
+            topLeft = arcTopLeft.plus(offset)
+        )
+    }
+    if (hasProgressive) {
+        val alpha = value / valueRange.endInclusive
+        drawArc(
+            color = arcColors.on,
+            alpha = if (style.hasProgressiveAlpha && alpha in 0f..1f) alpha else 1f,
+            startAngle = numerics.startAngle.toFloat(),
+            sweepAngle = translate(
+                value,
+                valueRange.start..valueRange.endInclusive,
+                numerics.startAngle.toFloat()..totalAngle.toFloat()
+            ),
+            useCenter = false,
+            style = arcStroke,
+            size = arcSize,
+            topLeft = arcTopLeft.plus(offset)
+        )
+    }
 }
 
 private fun DrawScope.drawCompatibleText(

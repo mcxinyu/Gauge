@@ -36,6 +36,6 @@ data class GaugeNumerics(
     val startAngle: Int,
     val sweepAngle: Int,
     val valueRange: ClosedFloatingPointRange<Float>,
-    val smallTicksStep: Int = 2,
-    val bigTicksStep: Int = 10,
+    val smallTicksStep: Float = 2f,
+    val bigTicksStep: Float = 10f,
 )
