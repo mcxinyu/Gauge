@@ -130,16 +130,18 @@ fun Gauge(
                             totalSize = safeSize.toDp()
                         )
                     }
-                    // drawTicks(
-                    //     offset = safeOffset,
-                    //     numerics = numerics,
-                    //     totalAngle = totalAngle,
-                    //     colors = colors.ticks,
-                    //     size = safeSize.toDp(),
-                    //     textMeasurer = textMeasurer,
-                    //     hasNumbers = style.arcStyle.bigTicksHasLabels,
-                    //     ticksColorProvider = ticksColorProvider
-                    // )
+                    if (style.hasTicks) {
+                        drawTicks(
+                            offset = safeOffset,
+                            numerics = numerics,
+                            totalAngle = totalAngle,
+                            colors = colors.ticks,
+                            size = safeSize.toDp(),
+                            textMeasurer = textMeasurer,
+                            hasNumbers = style.arcStyle.bigTicksHasLabels,
+                            ticksColorProvider = ticksColorProvider
+                        )
+                    }
                     if (style.arcStyle.hasArcs) {
                         drawArcs(
                             offset = safeOffset,
@@ -226,13 +228,6 @@ private fun DrawScope.drawNeedle(
             center = endOffset
         )
     }
-    if (style.tipHasCircle) {
-        drawCircle(
-            color = colors.needle,
-            radius = size.toPx() / 50,
-            center = endOffset
-        )
-    }
 }
 
 private fun DrawScope.drawTicks(
@@ -292,7 +287,7 @@ private fun DrawScope.drawTicks(
             )
         }
         if (hasNumbers && isBigTick) {
-            val textSizeFactor = 15f
+            val textSizeFactor = 5f
             val textStyle = TextStyle(
                 color = colors.bigTicksLabels,
                 fontSize = size.toSp() / textSizeFactor
@@ -340,8 +335,8 @@ private fun DrawScope.drawArcs(
     val arcColors = arcColorsProvider(colors, value, valueRange)
 
     val strokeWidth = if (style.strokeWidth != null) {
-        if (style.strokeWidth < size.toPx() / 15f) style.strokeWidth else size.toPx() / 15f
-    } else size.toPx() / 15f
+        if (style.strokeWidth < size.toPx() / 10f) style.strokeWidth else size.toPx() / 10f
+    } else size.toPx() / 10f
 
     val arcStroke = Stroke(
         width = strokeWidth,
@@ -360,8 +355,8 @@ private fun DrawScope.drawArcs(
     arcRingColors.forEachIndexed { i, color ->
         drawArc(
             color = color,
-            startAngle = numerics.startAngle.toFloat() + (sweepAngle - arcGap) * i + arcGap * i,
-            sweepAngle = sweepAngle - arcGap,
+            startAngle = numerics.startAngle.toFloat() + sweepAngle * i + if (i != 0) arcGap / 2f else 0f,
+            sweepAngle = sweepAngle - arcGap / 2f - (arcGap / 2f * if (i == arcRingColors.size - 1) 0 else i),
             useCenter = false,
             style = arcStroke,
             size = arcSize,

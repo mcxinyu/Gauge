@@ -33,6 +33,7 @@ package com.github.yamin8000.gauge.ui.style
 data class GaugeStyle(
     val hasBorder: Boolean = true,
     val hasValueText: Boolean = true,
+    val hasTicks: Boolean = true,
     val borderWidth: Float = 20f,
     val arcStyle: GaugeArcStyle = GaugeArcStyle(),
     val needleStyle: GaugeNeedleStyle = GaugeNeedleStyle()

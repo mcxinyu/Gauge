@@ -77,9 +77,9 @@ class MainActivity : ComponentActivity() {
                         ) {
                             val configuration = LocalConfiguration.current
                             val screenWidth = configuration.screenWidthDp.dp
-                            var value by remember { mutableFloatStateOf(66.66f) }
-                            var totalSize by remember { mutableStateOf(350.dp) }
-                            var strokeWidth by remember { mutableFloatStateOf(35f) }
+                            var value by remember { mutableFloatStateOf(33.33f) }
+                            var totalSize by remember { mutableStateOf(400.dp) }
+                            var strokeWidth by remember { mutableFloatStateOf(60f) }
                             val valueRange = 0f..100f
                             Box() {
                                 Gauge(
@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
                                         borderWidth = 0f,
                                         needleStyle = GaugeNeedleStyle(
                                             hasNeedle = true,
-                                            tipHasCircle = false,
+                                            tipHasCircle = true,
                                             tipHasLine = true,
                                             hasRing = false,
                                             ringWidth = 0f,
@@ -108,6 +108,7 @@ class MainActivity : ComponentActivity() {
                                             hasProgressive = false,
                                             bigTicksHasLabels = false,
                                             cap = StrokeCap.Butt,
+                                            strokeWidth = strokeWidth,
                                             gap = 1f,
                                         ),
                                     ),
