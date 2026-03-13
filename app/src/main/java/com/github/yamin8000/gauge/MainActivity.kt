@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             val configuration = LocalConfiguration.current
                             val screenWidth = configuration.screenWidthDp.dp
-                            var value by remember { mutableFloatStateOf(33.33f) }
+                            var value by remember { mutableFloatStateOf(50f) }
                             var totalSize by remember { mutableStateOf(400.dp) }
                             var strokeWidth by remember { mutableFloatStateOf(60f) }
                             val valueRange = 0f..100f
@@ -98,8 +98,9 @@ class MainActivity : ComponentActivity() {
                                         borderWidth = 0f,
                                         needleStyle = GaugeNeedleStyle(
                                             hasNeedle = true,
-                                            tipHasCircle = true,
+                                            tipHasCircle = false,
                                             tipHasLine = true,
+                                            tipHasTriangle = true,
                                             hasRing = false,
                                             ringWidth = 0f,
                                         ),
@@ -109,12 +110,11 @@ class MainActivity : ComponentActivity() {
                                             bigTicksHasLabels = false,
                                             cap = StrokeCap.Butt,
                                             strokeWidth = strokeWidth,
-                                            gap = 1f,
                                         ),
                                     ),
                                     ticksColorProvider = { list ->
                                         list.map { pair ->
-                                            if (pair.first % 33 == 0)
+                                            if (pair.first % 10 == 0)
                                                 pair.first to Color(0xFF2962FF)
                                             else pair
                                         }

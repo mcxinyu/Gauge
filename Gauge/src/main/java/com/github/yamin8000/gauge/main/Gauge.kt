@@ -36,6 +36,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -212,21 +214,44 @@ private fun DrawScope.drawNeedle(
         x.minus(cos.times(size.toPx() / 20f)),
         y.minus(sin.times(size.toPx() / 20f))
     ).plus(offset)
-    if (style.tipHasLine) {
+    if (style.tipHasLine && !style.tipHasTriangle) {
+        val end = Offset(x = endOffset.x + size.toPx() / 50, y = endOffset.y + size.toPx() / 50)
         drawLine(
             color = colors.needle,
             start = center,
             strokeWidth = 10f,
             cap = StrokeCap.Round,
-            end = endOffset
+            end = endOffset,
         )
     }
-    if (style.tipHasCircle) {
+    if (style.tipHasCircle && !style.tipHasTriangle) {
         drawCircle(
             color = colors.needle,
             radius = size.toPx() / 50,
             center = endOffset
         )
+    }
+    if (style.tipHasTriangle) {
+        // 计算 center 和 end 连线的角度
+        val degree = translate(
+            value,
+            numerics.valueRange,
+            numerics.startAngle.toFloat()..totalAngle.toFloat(),
+        ) - 90f
+        rotate(degree, endOffset) {
+            val h = size.toPx() / 20f
+            translate(h / 2f + 5f, h / 2f + 10f) {
+                // 画三角形
+                val trianglePath = Path().apply {
+                    moveTo(endOffset.x, endOffset.y) // 下边中心
+                    lineTo(endOffset.x - h, endOffset.y + h) // 左角
+                    lineTo(endOffset.x - h / 3f * 2, endOffset.y - h / 3f * 2) // 斜边顶点
+                    lineTo(endOffset.x + h, endOffset.y - h) // 右角
+                    close()
+                }
+                drawPath(trianglePath, colors.needle)
+            }
+        }
     }
 }
 

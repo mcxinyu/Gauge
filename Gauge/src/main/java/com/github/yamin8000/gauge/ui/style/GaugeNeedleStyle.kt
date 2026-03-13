@@ -32,6 +32,7 @@ package com.github.yamin8000.gauge.ui.style
 data class GaugeNeedleStyle(
     val hasNeedle: Boolean = true,
     val tipHasCircle: Boolean = true,
+    val tipHasTriangle: Boolean = false,
     val tipHasLine: Boolean = true,
     val hasRing: Boolean = true,
     val ringWidth: Float = 20f,
